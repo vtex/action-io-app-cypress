@@ -54,7 +54,7 @@ function run() {
     });
 }
 run();
-
+//# sourceMappingURL=main.js.map
 
 /***/ }),
 
@@ -77,7 +77,7 @@ exports.wait = void 0;
 function wait(milliseconds) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
+            if (Number.isNaN(milliseconds)) {
                 throw new Error('milliseconds not a number');
             }
             setTimeout(() => resolve('done!'), milliseconds);
@@ -85,7 +85,7 @@ function wait(milliseconds) {
     });
 }
 exports.wait = wait;
-
+//# sourceMappingURL=wait.js.map
 
 /***/ }),
 
