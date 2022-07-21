@@ -61,4 +61,4 @@ That's it! You should now be able to monitor your VTEX IO app in pull requests
 and pushes to specific branches with the full coverage Cypress can offer.
 
 [Cypress]: https://www.cypress.io/
-[generting App Keys in your account]: https://help.vtex.com/tutorial/application-keys--2iffYzlvvz4BDMr6WGUtet#generating-app-keys-in-your-account
+[generating App Keys in your account]: https://help.vtex.com/tutorial/application-keys--2iffYzlvvz4BDMr6WGUtet#generating-app-keys-in-your-account
