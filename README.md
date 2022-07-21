@@ -39,6 +39,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: vtex/action-toolbelt-login@v1
+      with:
+        account: MY_ACCOUNT
+        app-key: ${{ secrets.APP_KEY }}
+        app-token: ${{ secrets.APP_TOKEN }}
     - uses: vtex/action-io-app-cypress@v1
       with:
         account: MY_ACCOUNT
