@@ -1,13 +1,13 @@
 {
-  "name": "typescript-action",
+  "name": "action-io-app-cypress",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Action to run Cypress tests on VTEX IO apps",
   "main": "lib/main.js",
   "scripts": {
     "build": "npm run build:ts && npm run build:ncc",
     "build:ts": "tsc",
-    "build:ncc": "ncc build --source-map --license licenses.txt"
+    "build:ncc": "ncc build --source-map --license licenses.txt",
     "lint": "eslint --ext ts,js .",
     "test": "jest"
   },

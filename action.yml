@@ -1,11 +1,23 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'VTEX IO App Cypress'
+description: 'Run Cypress tests on VTEX IO apps'
+author: VTEX
 inputs:
-  milliseconds: # change this
+  account:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'VTEX Account'
+  app-key:
+    required: true
+    description: 'APP Key used for authenticating with Toolbelt'
+  app-token:
+    required: true
+    description: 'APP Token used for authenticating with Toolbelt'
+  test-repository:
+    description: 'Repository containing Cypress tests (e.g. vtex/my-app-tests)'
+  test-repository-ref:
+    description: 'Ref to repository containing Cypress tests (e.g. main)'
+  link-retries:
+    description: 'Amount of retries to do on link failure'
+    default: 3
 runs:
   using: 'node16'
   main: 'dist/index.js'
