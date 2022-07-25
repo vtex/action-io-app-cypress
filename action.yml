@@ -23,19 +23,28 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Clone app repository
+      uses: actions/checkout@v3
+      with:
+        path: io-app
     - name: Clone test repository
       if: ${{ inputs['test-repository'] }}
       uses: actions/checkout@v3
       with:
         repository: ${{ inputs['test-repository'] }}
         ref: ${{ inputs['test-repository-ref'] }}
-        path: test-reposecrets
+        path: tests
     - uses: vtex/action-toolbelt-login@v1
       with:
         account: ${{ inputs.account }}
         app-key: ${{ inputs['app-key'] }}
         app-token: ${{ inputs['app-token'] }}
-    - uses: ./.github/actions/create-workspace
+    - name: Clone action repo
+      uses: actions/checkout@v3
+      with:
+        repository: vtex/action-io-app-cypress
+        path: io-action
+    - uses: ./io-action/.github/actions/create-workspace
       with:
         workspace: e2e${{ github.sha }}
     - name: Install toolbelt
@@ -47,13 +56,15 @@ runs:
       uses: nick-fields/retry@v2
       with:
         max_attempts: ${{ inputs['link-retries'] }}
-        command: yes | vtex link --no-watch
+        command: |
+          cd io-app
+          yes | vtex link --no-watch
         shell: bash
     - name: Cypress
       uses: cypress-io/github-action@v4
       with:
         spec: ${{ inputs.spec }}
-        working-directory: ${{ inputs['test-repository'] == '' && env.GITHUB_WORKSPACE || 'test-repo' }}
+        working-directory: ${{ inputs['test-repository'] == '' && env.GITHUB_WORKSPACE || 'tests' }}
       env:
         CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
         CYPRESS_APP_KEY: ${{ inputs['app-key'] }}
