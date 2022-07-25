@@ -18,6 +18,43 @@ inputs:
   link-retries:
     description: 'Amount of retries to do on link failure'
     default: 3
+  spec:
+    description: 'Spec regex for Cypress tests'
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: 'composite'
+  steps:
+    - name: Clone test repository
+      if: ${{ inputs['test-repository'] }}
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs['test-repository'] }}
+        ref: ${{ inputs['test-repository-ref'] }}
+        path: test-repo
+    - uses: vtex/action-toolbelt-login
+      with:
+        account: ${{ inputs.account }}
+        app-key: ${{ inputs['app-key'] }}
+        app-token: ${{ inputs['app-token'] }}
+    - uses: ./.github/actions/create-workspace
+      with:
+        workspace: e2e${{ github.sha }}
+    - name: Install toolbelt
+      run: |
+        yarn global add vtex
+        echo "$(yarn global bin)" >> $GITHUB_PATH
+    - name: Link app
+      uses: nick-fields/retry@v2
+      with:
+        max_attempts: ${{ inputs['link-retries'] }}
+        command: yes | vtex link --no-watch
+    - name: Cypress
+      uses: cypress-io/github-action
+      with:
+        spec: ${{ inputs.spec }}
+        working-directory: ${{ inputs['test-repository'] == '' && env.GITHUB_WORKSPACE || 'test-repo' }}
+      env:
+        CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
+        CYPRESS_APP_KEY: ${{ inputs['app-key'] }}
+        CYPRESS_APP_TOKEN: ${{ inputs['app-token'] }}
+        COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
+        COMMIT_INFO_AUTHOR: ${{ github.actor }}
