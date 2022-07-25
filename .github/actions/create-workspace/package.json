@@ -1,0 +1,26 @@
+{
+  "name": "create-workspace",
+  "version": "1.0.0",
+  "main": "lib/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn build:ts && yarn build:ncc",
+    "build:ts": "tsc",
+    "build:ncc": "ncc build --source-map --license licenses.txt"
+  },
+  "dependencies": {
+    "@actions/core": "^1.9.0",
+    "@actions/exec": "^1.1.1",
+    "@actions/io": "^1.1.2",
+    "@vercel/ncc": "^0.34.0",
+    "typescript": "^4.7.4",
+    "vtex": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vtex/prettier-config": "^1.0.0",
+    "@vtex/tsconfig": "^0.6.0",
+    "eslint": "^8.20.0",
+    "eslint-config-vtex": "^15.0.1",
+    "prettier": "^2.7.1"
+  }
+}

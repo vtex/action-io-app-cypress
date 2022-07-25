@@ -1,0 +1,11 @@
+name: 'VTEX Create Workspace'
+description: 'Create temporary VTEX IO workspace'
+author: VTEX
+inputs:
+  workspace:
+    required: true
+    description: 'Workspace name'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
