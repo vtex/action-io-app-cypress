@@ -29,8 +29,8 @@ runs:
       with:
         repository: ${{ inputs['test-repository'] }}
         ref: ${{ inputs['test-repository-ref'] }}
-        path: test-repo
-    - uses: vtex/action-toolbelt-login
+        path: test-reposecrets
+    - uses: vtex/action-toolbelt-login@v1
       with:
         account: ${{ inputs.account }}
         app-key: ${{ inputs['app-key'] }}
@@ -39,6 +39,7 @@ runs:
       with:
         workspace: e2e${{ github.sha }}
     - name: Install toolbelt
+      shell: bash
       run: |
         yarn global add vtex
         echo "$(yarn global bin)" >> $GITHUB_PATH
@@ -47,8 +48,9 @@ runs:
       with:
         max_attempts: ${{ inputs['link-retries'] }}
         command: yes | vtex link --no-watch
+        shell: bash
     - name: Cypress
-      uses: cypress-io/github-action
+      uses: cypress-io/github-action@v4
       with:
         spec: ${{ inputs.spec }}
         working-directory: ${{ inputs['test-repository'] == '' && env.GITHUB_WORKSPACE || 'test-repo' }}
