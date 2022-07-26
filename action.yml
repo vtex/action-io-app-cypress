@@ -82,6 +82,7 @@ runs:
       working-directory: io-app
       run: |
         echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
+      shell: bash
     - name: Cypress
       uses: cypress-io/github-action@v4
       with:
