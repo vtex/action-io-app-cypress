@@ -107,7 +107,7 @@ jobs:
         run: ./setup-containers.sh ${{ inputs.containers }}
         shell: bash
 
-  test:
+  run-cypress:
     needs: setup-containers
     runs-on: ubuntu-latest
 
@@ -153,7 +153,7 @@ jobs:
           COMMIT_INFO_REMOTE: ${{ github.repository }}
 
   delete-workspace:
-    needs: [link-app, test]
+    needs: [link-app, run-cypress]
     runs-on: ubuntu-latest
     if: ${{ always() }}
 
