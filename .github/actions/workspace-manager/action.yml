@@ -1,0 +1,20 @@
+name: 'VTEX Workspace Manager'
+description: 'Create or delete workspaces in VTEX IO infrastructure'
+author: VTEX
+inputs:
+  account:
+    required: true
+    description: 'VTEX account'
+  workspace:
+    required: true
+    description: 'Workspace name'
+  token:
+    required: true
+    description: 'Authentication token for VTEX APIs'
+  action:
+    required: true
+    description: 'Which action to execute, either "create" or "delete"'
+    default: create
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

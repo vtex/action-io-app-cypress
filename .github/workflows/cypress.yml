@@ -39,6 +39,10 @@ jobs:
       matrix:
         account: ${{ fromJSON(inputs.accounts) }}
 
+    outputs:
+      workspace-name: ${{ steps.workspace-name.outputs.workspace }}
+      token: ${{ steps.login.outputs.token }}
+
     steps:
       - name: Clone app repository
         uses: actions/checkout@v3
@@ -62,11 +66,12 @@ jobs:
           sha8=${sha:0:8}
           echo ::set-output name=workspace::e2e$sha8
         shell: bash
-      - uses: ./io-action/.github/actions/create-workspace
+      - uses: ./io-action/.github/actions/workspace-manager
         with:
           workspace: ${{ steps.workspace-name.outputs.workspace }}
           account: ${{ matrix.account }}
           token: ${{ steps.login.outputs.token }}
+          action: create
       - name: Install toolbelt
         shell: bash
         run: |
@@ -81,38 +86,57 @@ jobs:
             cd io-app
             yes | vtex link --no-watch
           shell: bash
+
   test:
     needs: link-app
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Clone test repository
-      if: ${{ inputs.test-repository }}
-      uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.test-repository }}
-        ref: ${{ inputs.test-repository-ref }}
-        path: tests
-    - name: Get committer email
-      working-directory: io-app
-      run: |
-        echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
-      shell: bash
-    - name: Cypress
-      uses: cypress-io/github-action@v4
-      with:
-        tag: 'repo:${{ github.action_repository }}'
-        spec: ${{ inputs.spec }}
-        working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
-        parallel: ${{ inputs.parallel }}
-        record: ${{ !!secrets.RECORD_KEY }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
-        CYPRESS_VTEX_WORKSPACE: ${{ steps.workspace-name.outputs.workspace }}
-        CYPRESS_APP_KEY: ${{ secrets.APP_KEY }}
-        CYPRESS_APP_TOKEN: ${{ secrets.APP_TOKEN }}
-        COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
-        COMMIT_INFO_AUTHOR: ${{ github.actor }}
-        COMMIT_INFO_BRANCH: ${{ github.head_ref }}
-        COMMIT_INFO_SHA: ${{ github.sha }}
-        COMMIT_INFO_REMOTE: ${{ github.repository }}
+      - name: Clone test repository
+        if: ${{ inputs.test-repository }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.test-repository }}
+          ref: ${{ inputs.test-repository-ref }}
+          path: tests
+      - name: Get committer email
+        working-directory: io-app
+        run: |
+          echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
+        shell: bash
+      - name: Cypress
+        uses: cypress-io/github-action@v4
+        with:
+          tag: 'repo:${{ github.action_repository }}'
+          spec: ${{ inputs.spec }}
+          working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
+          parallel: ${{ inputs.parallel }}
+          record: ${{ !!secrets.RECORD_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
+          CYPRESS_VTEX_WORKSPACE: ${{ needs.link-app.outputs.workspace-name }}
+          CYPRESS_APP_KEY: ${{ secrets.APP_KEY }}
+          CYPRESS_APP_TOKEN: ${{ secrets.APP_TOKEN }}
+          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
+          COMMIT_INFO_AUTHOR: ${{ github.actor }}
+          COMMIT_INFO_BRANCH: ${{ github.head_ref }}
+          COMMIT_INFO_SHA: ${{ github.sha }}
+          COMMIT_INFO_REMOTE: ${{ github.repository }}
+
+  delete-workspace:
+    needs: [link-app, test]
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+
+    strategy:
+      matrix:
+        account: ${{ fromJSON(inputs.accounts) }}
+
+    steps:
+      - uses: ./io-action/.github/actions/workspace-manager
+        with:
+          workspace: ${{ needs.link-app.workspace-name.outputs.workspace }}
+          account: ${{ matrix.account }}
+          token: ${{ needs.link-app.outputs.token }}
+          action: delete
