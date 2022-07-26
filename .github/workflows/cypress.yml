@@ -143,6 +143,11 @@ jobs:
           account: ${{ matrix.account }}
           app-key: ${{ secrets.APP_KEY }}
           app-token: ${{ secrets.APP_TOKEN }}
+      - name: Clone action repo
+        uses: actions/checkout@v3
+        with:
+          repository: vtex/action-io-app-cypress
+          path: io-action
       - uses: ./io-action/.github/actions/workspace-manager
         with:
           workspace: ${{ needs.link-app.workspace-name.outputs.workspace }}
