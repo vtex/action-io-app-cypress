@@ -1,6 +1,7 @@
 import type { IOContext } from '@vtex/api'
-import { createTracingContextFromCarrier } from '@vtex/api'
 import { Logger } from '@vtex/api/lib/service/logger'
+
+const noop = () => {}
 
 export function createContext({
   account,
@@ -11,8 +12,6 @@ export function createContext({
   workspace: string
   authToken: string
 }): IOContext {
-  const { tracer } = createTracingContextFromCarrier('', {})
-
   return {
     account,
     userAgent: 'GitHub Action',
@@ -26,7 +25,13 @@ export function createContext({
       type: 'public',
       params: {},
     },
-    tracer,
+    tracer: {
+      fallbackSpanContext: () => ({} as any),
+      inject: noop,
+      isTraceSampled: false,
+      startSpan: () => ({} as any),
+      traceId: '',
+    },
     requestId: '',
     operationId: '',
     platform: '',
