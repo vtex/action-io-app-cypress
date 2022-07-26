@@ -45,9 +45,16 @@ runs:
       with:
         repository: vtex/action-io-app-cypress
         path: io-action
+    - name: Set workspace name
+      id: workspace-name
+      run: |
+        sha=${{ github.sha }}
+        sha8=${sha:0:8}
+        echo ::set-output name=workspace::e2e$sha8
+      shell: bash
     - uses: ./io-action/.github/actions/create-workspace
       with:
-        workspace: e2e${{ github.sha }}
+        workspace: ${{ steps.workspace-name.outputs.workspace }}
         account: ${{ inputs.account }}
         token: ${{ steps.login.outputs.token }}
     - name: Install toolbelt
@@ -70,7 +77,7 @@ runs:
         spec: ${{ inputs.spec }}
         working-directory: ${{ inputs['test-repository'] == '' && 'io-app' || 'tests' }}
       env:
-        CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
+        CYPRESS_VTEX_WORKSPACE: ${{ steps.workspace-name.outputs.workspace }}
         CYPRESS_APP_KEY: ${{ inputs['app-key'] }}
         CYPRESS_APP_TOKEN: ${{ inputs['app-token'] }}
         COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
