@@ -59,6 +59,7 @@ runs:
       uses: nick-fields/retry@v2
       with:
         max_attempts: ${{ inputs['link-retries'] }}
+        timeout_minutes: 5
         command: |
           cd io-app
           yes | vtex link --no-watch
