@@ -20,6 +20,13 @@ inputs:
     default: 3
   spec:
     description: 'Spec regex for Cypress tests'
+  github-token:
+    description: 'GitHub token used for Cypress tests'
+  parallel:
+    description: 'Whether to run tests in parallel'
+    default: false
+  record-key:
+    description: 'Record key for Cypress dashboard'
 runs:
   using: 'composite'
   steps:
@@ -80,7 +87,11 @@ runs:
       with:
         spec: ${{ inputs.spec }}
         working-directory: ${{ inputs['test-repository'] == '' && 'io-app' || 'tests' }}
+        parallel: ${{ inputs.parallel }}
+        record: ${{ !!inputs.record-key }}
       env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        CYPRESS_RECORD_KEY: ${{ inputs.record-key }}
         CYPRESS_VTEX_WORKSPACE: ${{ steps.workspace-name.outputs.workspace }}
         CYPRESS_APP_KEY: ${{ inputs['app-key'] }}
         CYPRESS_APP_TOKEN: ${{ inputs['app-token'] }}
