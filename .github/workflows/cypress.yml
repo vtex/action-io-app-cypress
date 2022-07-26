@@ -41,7 +41,6 @@ jobs:
 
     outputs:
       workspace-name: ${{ steps.workspace-name.outputs.workspace }}
-      token: ${{ steps.login.outputs.token }}
 
     steps:
       - name: Clone app repository
@@ -92,6 +91,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Clone app repository
+        uses: actions/checkout@v3
+        with:
+          path: io-app
       - name: Clone test repository
         if: ${{ inputs.test-repository }}
         uses: actions/checkout@v3
@@ -134,9 +137,15 @@ jobs:
         account: ${{ fromJSON(inputs.accounts) }}
 
     steps:
+      - uses: vtex/action-toolbelt-login@v1
+        id: login
+        with:
+          account: ${{ matrix.account }}
+          app-key: ${{ secrets.APP_KEY }}
+          app-token: ${{ secrets.APP_TOKEN }}
       - uses: ./io-action/.github/actions/workspace-manager
         with:
           workspace: ${{ needs.link-app.workspace-name.outputs.workspace }}
           account: ${{ matrix.account }}
-          token: ${{ needs.link-app.outputs.token }}
+          token: ${{ steps.login.outputs.token }}
           action: delete
