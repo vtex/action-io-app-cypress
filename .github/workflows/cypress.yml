@@ -135,7 +135,7 @@ jobs:
       - name: Cypress
         uses: cypress-io/github-action@v4
         with:
-          tag: 'repo:${{ github.action_repository }}'
+          tag: 'repo:${{ github.repository }}'
           spec: ${{ inputs.spec }}
           working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
           parallel: ${{ inputs.parallel }}
