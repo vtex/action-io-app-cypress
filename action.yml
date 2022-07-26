@@ -68,7 +68,7 @@ runs:
       uses: cypress-io/github-action@v4
       with:
         spec: ${{ inputs.spec }}
-        working-directory: ${{ inputs['test-repository'] == '' && env.GITHUB_WORKSPACE || 'tests' }}
+        working-directory: ${{ inputs['test-repository'] == '' && 'io-app' || 'tests' }}
       env:
         CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
         CYPRESS_APP_KEY: ${{ inputs['app-key'] }}
