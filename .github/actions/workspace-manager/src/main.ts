@@ -23,14 +23,12 @@ async function run() {
       )
 
       if (existingWorkspace.statusCode !== 404) {
-        core.info(`Workspace "${workspaceName}" already exists, exiting.`)
+        core.warning(`Workspace "${workspaceName}" already exists.`)
+      } else {
+        await workspacesClient.create(account, workspaceName, false)
 
-        return
+        core.info(`Successfully created workspace "${workspaceName}"`)
       }
-
-      await workspacesClient.create(account, workspaceName, false)
-
-      core.info(`Successfully created workspace "${workspaceName}"`)
 
       const updated = await updateToolbeltWorkspaceSession(workspaceName)
 
@@ -44,6 +42,17 @@ async function run() {
     }
 
     case 'delete': {
+      const existingWorkspace = await workspacesClient.get(
+        account,
+        workspaceName
+      )
+
+      if (existingWorkspace.statusCode !== 200) {
+        core.error(`Workspace "${workspaceName}" does not exist, exiting.`)
+
+        return
+      }
+
       await workspacesClient.delete(account, workspaceName)
 
       core.info(`Succesfully deleted workspace "${workspaceName}"`)

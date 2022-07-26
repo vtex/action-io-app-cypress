@@ -88,11 +88,12 @@ function run() {
             case 'create': {
                 const existingWorkspace = yield workspacesClient.get(account, workspaceName);
                 if (existingWorkspace.statusCode !== 404) {
-                    core.info(`Workspace "${workspaceName}" already exists, exiting.`);
-                    return;
+                    core.warning(`Workspace "${workspaceName}" already exists.`);
                 }
-                yield workspacesClient.create(account, workspaceName, false);
-                core.info(`Successfully created workspace "${workspaceName}"`);
+                else {
+                    yield workspacesClient.create(account, workspaceName, false);
+                    core.info(`Successfully created workspace "${workspaceName}"`);
+                }
                 const updated = yield (0, session_1.updateToolbeltWorkspaceSession)(workspaceName);
                 if (updated) {
                     core.info(`Updated toolbelt workspace session to use workspace "${workspaceName}"`);
@@ -100,6 +101,11 @@ function run() {
                 break;
             }
             case 'delete': {
+                const existingWorkspace = yield workspacesClient.get(account, workspaceName);
+                if (existingWorkspace.statusCode !== 200) {
+                    core.error(`Workspace "${workspaceName}" does not exist, exiting.`);
+                    return;
+                }
                 yield workspacesClient.delete(account, workspaceName);
                 core.info(`Succesfully deleted workspace "${workspaceName}"`);
                 const updated = yield (0, session_1.updateToolbeltWorkspaceSession)('-');
