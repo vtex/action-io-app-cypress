@@ -38,7 +38,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
     - uses: vtex/action-io-app-cypress@v1
       with:
         account: MY_ACCOUNT
