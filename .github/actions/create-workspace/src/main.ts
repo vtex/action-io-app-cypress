@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 
 import { createWorkspacesClient } from './workspacesClient'
+import { updateToolbeltWorkspaceSession } from './session'
 
 async function run() {
   const account = core.getInput('account', { required: true })
@@ -16,6 +17,14 @@ async function run() {
   await workspacesClient.create(account, workspaceName, false)
 
   core.info(`Successfully created workspace "${workspaceName}"`)
+
+  const updated = await updateToolbeltWorkspaceSession(workspaceName)
+
+  if (updated) {
+    core.info(
+      `Updated toolbelt workspace session to use workspace "${workspaceName}"`
+    )
+  }
 
   core.saveState('createdWorkspace', workspaceName)
   core.saveState('account', account)
@@ -40,6 +49,12 @@ async function cleanup() {
   await workspacesClient.delete(account, createdWorkspace)
 
   core.info(`Succesfully deleted workspace "${createdWorkspace}"`)
+
+  const updated = await updateToolbeltWorkspaceSession('-')
+
+  if (updated) {
+    core.info('Updated toolbelt workspace session to use last workspace')
+  }
 }
 
 if (!core.getState('createdWorkspace')) {

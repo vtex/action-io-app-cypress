@@ -72,6 +72,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const workspacesClient_1 = __nccwpck_require__(792);
+const session_1 = __nccwpck_require__(100);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const account = core.getInput('account', { required: true });
@@ -84,6 +85,10 @@ function run() {
         });
         yield workspacesClient.create(account, workspaceName, false);
         core.info(`Successfully created workspace "${workspaceName}"`);
+        const updated = yield (0, session_1.updateToolbeltWorkspaceSession)(workspaceName);
+        if (updated) {
+            core.info(`Updated toolbelt workspace session to use workspace "${workspaceName}"`);
+        }
         core.saveState('createdWorkspace', workspaceName);
         core.saveState('account', account);
         core.saveState('token', authToken);
@@ -104,6 +109,10 @@ function cleanup() {
         });
         yield workspacesClient.delete(account, createdWorkspace);
         core.info(`Succesfully deleted workspace "${createdWorkspace}"`);
+        const updated = yield (0, session_1.updateToolbeltWorkspaceSession)('-');
+        if (updated) {
+            core.info('Updated toolbelt workspace session to use last workspace');
+        }
     });
 }
 if (!core.getState('createdWorkspace')) {
@@ -112,6 +121,74 @@ if (!core.getState('createdWorkspace')) {
 else {
     cleanup();
 }
+
+
+/***/ }),
+
+/***/ 100:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.updateToolbeltWorkspaceSession = void 0;
+const os_1 = __nccwpck_require__(37);
+const path = __importStar(__nccwpck_require__(17));
+const fs = __importStar(__nccwpck_require__(292));
+const fs_1 = __nccwpck_require__(147);
+function updateToolbeltWorkspaceSession(workspaceName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const sessionDirectory = path.join((0, os_1.homedir)(), '.vtex', 'session');
+        const workspaceFile = path.join(sessionDirectory, 'workspace.json');
+        if (!(0, fs_1.existsSync)(workspaceFile)) {
+            return false;
+        }
+        const workspace = JSON.parse((yield fs.readFile(workspaceFile)).toString());
+        if (workspaceName === '-') {
+            workspace.currentWorkspace = workspace.lastWorkspace;
+            workspace.lastWorkspace = null;
+        }
+        else {
+            workspace.lastWorkspace = workspace.currentWorkspace;
+            workspace.currentWorkspace = workspaceName;
+        }
+        yield fs.writeFile(workspaceFile, JSON.stringify(workspace));
+        return true;
+    });
+}
+exports.updateToolbeltWorkspaceSession = updateToolbeltWorkspaceSession;
 
 
 /***/ }),
@@ -2230,6 +2307,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 
