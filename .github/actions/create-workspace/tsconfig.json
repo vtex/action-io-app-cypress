@@ -6,7 +6,8 @@
     "outDir": "./lib",
     "strict": true,
     "noImplicitAny": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "lib", "dist"]
 }

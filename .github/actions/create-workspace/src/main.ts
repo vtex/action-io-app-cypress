@@ -1,45 +1,45 @@
-import * as path from 'path'
-import * as fs from 'fs/promises'
-
 import * as core from '@actions/core'
-import type { ExecOptions } from '@actions/exec'
-import { exec } from '@actions/exec'
 
-async function getToolbeltBin() {
-  const toolbeltBasePath = path.dirname(require.resolve('vtex/package.json'))
-  const { bin: toolbeltBin } = JSON.parse(
-    (await fs.readFile(path.join(toolbeltBasePath, 'package.json'))).toString()
-  )
-
-  return path.join(toolbeltBasePath, toolbeltBin)
-}
-
-async function execToolbelt(args: string[], execOptions?: ExecOptions) {
-  const bin = await getToolbeltBin()
-
-  await exec(process.execPath, [bin, ...args], execOptions)
-}
+import { createWorkspacesClient } from './workspacesClient'
 
 async function run() {
+  const account = core.getInput('account', { required: true })
   const workspaceName = core.getInput('workspace', { required: true })
+  const authToken = core.getInput('token', { required: true })
 
-  await execToolbelt(['use', workspaceName], {
-    input: Buffer.from('yes'),
+  const workspacesClient = createWorkspacesClient({
+    account,
+    workspace: 'master',
+    authToken,
   })
 
+  await workspacesClient.create(account, workspaceName, false)
+
+  core.info(`Successfully created workspace "${workspaceName}"`)
+
   core.saveState('createdWorkspace', workspaceName)
+  core.saveState('account', account)
+  core.saveState('token', authToken)
 }
 
 async function cleanup() {
   const createdWorkspace = core.getState('createdWorkspace')
+  const account = core.getState('account')
+  const authToken = core.getState('token')
 
   if (!createdWorkspace) {
     return
   }
 
-  await execToolbelt(['workspace', 'delete', createdWorkspace], {
-    input: Buffer.from('yes'),
+  const workspacesClient = createWorkspacesClient({
+    account,
+    workspace: createdWorkspace,
+    authToken,
   })
+
+  await workspacesClient.delete(account, createdWorkspace)
+
+  core.info(`Succesfully deleted workspace "${createdWorkspace}"`)
 }
 
 if (!core.getState('createdWorkspace')) {

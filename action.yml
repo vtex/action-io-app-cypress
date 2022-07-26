@@ -35,6 +35,7 @@ runs:
         ref: ${{ inputs['test-repository-ref'] }}
         path: tests
     - uses: vtex/action-toolbelt-login@v1
+      id: login
       with:
         account: ${{ inputs.account }}
         app-key: ${{ inputs['app-key'] }}
@@ -47,6 +48,8 @@ runs:
     - uses: ./io-action/.github/actions/create-workspace
       with:
         workspace: e2e${{ github.sha }}
+        account: ${{ inputs.account }}
+        token: ${{ steps.login.outputs.token }}
     - name: Install toolbelt
       shell: bash
       run: |
