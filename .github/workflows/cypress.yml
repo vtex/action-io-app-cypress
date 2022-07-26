@@ -1,0 +1,118 @@
+on:
+  workflow_call:
+    inputs:
+      accounts:
+        description: 'VTEX accounts to link and create workspaces for testing, formatted as JSON array of strings (e.g. ["my-account"])'
+        type: string
+      test-repository:
+        description: 'Repository containing Cypress tests (e.g. vtex/my-app-tests)'
+        type: string
+      test-repository-ref:
+        description: 'Ref to repository containing Cypress tests (e.g. main)'
+        type: string
+      link-retries:
+        description: 'Amount of retries to do on link failure'
+        default: 3
+        type: number
+      spec:
+        description: 'Spec regex for Cypress tests'
+        type: string
+      parallel:
+        description: 'Whether to run tests in parallel'
+        default: false
+        type: boolean
+    secrets:
+      APP_KEY:
+        description: 'APP Key used for authenticating with Toolbelt'
+        required: true
+      APP_TOKEN:
+        description: 'APP Token used for authenticating with Toolbelt'
+        required: true
+      RECORD_KEY:
+        description: 'Record key for Cypress dashboard'
+
+jobs:
+  link-app:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        account: ${{ fromJSON(inputs.accounts) }}
+
+    steps:
+      - name: Clone app repository
+        uses: actions/checkout@v3
+        with:
+          path: io-app
+      - uses: vtex/action-toolbelt-login@v1
+        id: login
+        with:
+          account: ${{ matrix.account }}
+          app-key: ${{ secrets.APP_KEY }}
+          app-token: ${{ secrets.APP_TOKEN }}
+      - name: Clone action repo
+        uses: actions/checkout@v3
+        with:
+          repository: vtex/action-io-app-cypress
+          path: io-action
+      - name: Set workspace name
+        id: workspace-name
+        run: |
+          sha=${{ github.sha }}
+          sha8=${sha:0:8}
+          echo ::set-output name=workspace::e2e$sha8
+        shell: bash
+      - uses: ./io-action/.github/actions/create-workspace
+        with:
+          workspace: ${{ steps.workspace-name.outputs.workspace }}
+          account: ${{ matrix.account }}
+          token: ${{ steps.login.outputs.token }}
+      - name: Install toolbelt
+        shell: bash
+        run: |
+          yarn global add vtex
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+      - name: Link app
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: ${{ inputs.link-retries }}
+          timeout_minutes: 5
+          command: |
+            cd io-app
+            yes | vtex link --no-watch
+          shell: bash
+  test:
+    needs: link-app
+
+    steps:
+    - name: Clone test repository
+      if: ${{ inputs.test-repository }}
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.test-repository }}
+        ref: ${{ inputs.test-repository-ref }}
+        path: tests
+    - name: Get committer email
+      working-directory: io-app
+      run: |
+        echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
+      shell: bash
+    - name: Cypress
+      uses: cypress-io/github-action@v4
+      with:
+        tag: 'repo:${{ github.action_repository }}'
+        spec: ${{ inputs.spec }}
+        working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
+        parallel: ${{ inputs.parallel }}
+        record: ${{ !!secrets.RECORD_KEY }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
+        CYPRESS_VTEX_WORKSPACE: ${{ steps.workspace-name.outputs.workspace }}
+        CYPRESS_APP_KEY: ${{ secrets.APP_KEY }}
+        CYPRESS_APP_TOKEN: ${{ secrets.APP_TOKEN }}
+        COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
+        COMMIT_INFO_AUTHOR: ${{ github.actor }}
+        COMMIT_INFO_BRANCH: ${{ github.head_ref }}
+        COMMIT_INFO_SHA: ${{ github.sha }}
+        COMMIT_INFO_REMOTE: ${{ github.repository }}
