@@ -21,14 +21,18 @@ on:
         description: 'Whether to run tests in parallel'
         default: false
         type: boolean
+      containers:
+        description: 'Amount of parallel containers to summon for running tests'
+        default: 5
+        type: number
     secrets:
-      APP_KEY:
+      app-key:
         description: 'APP Key used for authenticating with Toolbelt'
         required: true
-      APP_TOKEN:
+      app-token:
         description: 'APP Token used for authenticating with Toolbelt'
         required: true
-      RECORD_KEY:
+      record-key:
         description: 'Record key for Cypress dashboard'
 
 jobs:
@@ -51,8 +55,8 @@ jobs:
         id: login
         with:
           account: ${{ matrix.account }}
-          app-key: ${{ secrets.APP_KEY }}
-          app-token: ${{ secrets.APP_TOKEN }}
+          app-key: ${{ secrets.app-key }}
+          app-token: ${{ secrets.app-token }}
       - name: Clone action repo
         uses: actions/checkout@v3
         with:
@@ -86,9 +90,30 @@ jobs:
             yes | vtex link --no-watch
           shell: bash
 
-  test:
+  setup-containers:
     needs: link-app
     runs-on: ubuntu-latest
+
+    outputs:
+      containers: ${{ steps.containers.outputs.containers }}
+
+    steps:
+      - name: Clone action repo
+        uses: actions/checkout@v3
+        with:
+          repository: vtex/action-io-app-cypress
+      - name: Get number of containers
+        id: containers
+        run: ./setup-containers.sh ${{ inputs.containers }}
+        shell: bash
+
+  test:
+    needs: setup-containers
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        container: ${{ fromJSON(needs.setup-containers.outputs.containers) }}
 
     steps:
       - name: Clone app repository
@@ -114,13 +139,13 @@ jobs:
           spec: ${{ inputs.spec }}
           working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
           parallel: ${{ inputs.parallel }}
-          record: ${{ !!secrets.RECORD_KEY }}
+          record: ${{ !!secrets.record-key }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
+          CYPRESS_RECORD_KEY: ${{ secrets.record-key }}
           CYPRESS_VTEX_WORKSPACE: ${{ needs.link-app.outputs.workspace-name }}
-          CYPRESS_APP_KEY: ${{ secrets.APP_KEY }}
-          CYPRESS_APP_TOKEN: ${{ secrets.APP_TOKEN }}
+          CYPRESS_APP_KEY: ${{ secrets.app-key }}
+          CYPRESS_APP_TOKEN: ${{ secrets.app-token }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.actor }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
@@ -141,8 +166,8 @@ jobs:
         id: login
         with:
           account: ${{ matrix.account }}
-          app-key: ${{ secrets.APP_KEY }}
-          app-token: ${{ secrets.APP_TOKEN }}
+          app-key: ${{ secrets.app-key }}
+          app-token: ${{ secrets.app-token }}
       - name: Clone action repo
         uses: actions/checkout@v3
         with:
