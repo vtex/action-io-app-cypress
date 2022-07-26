@@ -175,7 +175,7 @@ jobs:
           path: io-action
       - uses: ./io-action/.github/actions/workspace-manager
         with:
-          workspace: ${{ needs.link-app.workspace-name.outputs.workspace }}
+          workspace: ${{ needs.link-app.outputs.workspace-name }}
           account: ${{ matrix.account }}
           token: ${{ steps.login.outputs.token }}
           action: delete
