@@ -21,6 +21,10 @@ class Workspaces {
     )
   }
 
+  public async get(account: string, workspace: string) {
+    return this.client.getJson(`${BASE_URL}/${account}/${workspace}`)
+  }
+
   public async create(account: string, workspace: string, production: boolean) {
     await this.client.postJson(`${BASE_URL}/${account}`, {
       name: workspace,

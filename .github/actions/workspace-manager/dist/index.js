@@ -86,6 +86,11 @@ function run() {
         });
         switch (action) {
             case 'create': {
+                const existingWorkspace = yield workspacesClient.get(account, workspaceName);
+                if (existingWorkspace.statusCode !== 404) {
+                    core.info(`Workspace "${workspaceName}" already exists, exiting.`);
+                    return;
+                }
                 yield workspacesClient.create(account, workspaceName, false);
                 core.info(`Successfully created workspace "${workspaceName}"`);
                 const updated = yield (0, session_1.updateToolbeltWorkspaceSession)(workspaceName);
@@ -232,6 +237,11 @@ class Workspaces {
                 Authorization: `Bearer ${context.authToken}`,
             },
             maxRetries: 3,
+        });
+    }
+    get(account, workspace) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.client.getJson(`${BASE_URL}/${account}/${workspace}`);
         });
     }
     create(account, workspace, production) {

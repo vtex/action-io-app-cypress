@@ -17,6 +17,17 @@ async function run() {
 
   switch (action) {
     case 'create': {
+      const existingWorkspace = await workspacesClient.get(
+        account,
+        workspaceName
+      )
+
+      if (existingWorkspace.statusCode !== 404) {
+        core.info(`Workspace "${workspaceName}" already exists, exiting.`)
+
+        return
+      }
+
       await workspacesClient.create(account, workspaceName, false)
 
       core.info(`Successfully created workspace "${workspaceName}"`)
