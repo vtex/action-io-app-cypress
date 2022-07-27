@@ -112,6 +112,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         container: ${{ fromJSON(needs.setup-containers.outputs.containers) }}
 
@@ -158,6 +159,7 @@ jobs:
     if: ${{ always() }}
 
     strategy:
+      fail-fast: false
       matrix:
         account: ${{ fromJSON(inputs.accounts) }}
 
