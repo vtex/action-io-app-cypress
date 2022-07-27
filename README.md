@@ -31,7 +31,7 @@ on:
 
 jobs:
   Cypress:
-    uses: vtex/action-io-app-cypress/.github/workflows/cypress.yml@main
+    uses: vtex/action-io-app-cypress/.github/workflows/cypress.yml@v1
     with:
       accounts: '["MY_ACCOUNT"]'
       # Optional repository containing cypress tests
