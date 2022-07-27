@@ -11,7 +11,7 @@ account], and then set them up as secrets on your repository.
 
 After that, you must have created at least some cypress tests in your 
 repository. Optionally, you can keep your tests in a separate repository and 
-reference them using the `test-repository` and `test-repository-ref` inputs.
+reference them using the `tests-repository` and `tests-repository-ref` inputs.
 
 Now, create a workflow file inside `.github/workflows` and paste in the 
 following into the file `e2e.yml` (remember to also update the input values as 
@@ -35,9 +35,9 @@ jobs:
     with:
       accounts: '["MY_ACCOUNT"]'
       # Optional repository containing cypress tests
-      test-repository: vtex/my-app-tests
+      tests-repository: vtex/my-app-tests
       # Optional ref for test repository
-      test-repository-ref: main
+      tests-repository-ref: main
       # Optional retry count to link app
       link-retries: 3
       # Optional pattern to filter tests that will be run by Cypress

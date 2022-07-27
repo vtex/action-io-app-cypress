@@ -4,10 +4,10 @@ on:
       accounts:
         description: 'VTEX accounts to link and create workspaces for testing, formatted as JSON array of strings (e.g. ["my-account"])'
         type: string
-      test-repository:
+      tests-repository:
         description: 'Repository containing Cypress tests (e.g. vtex/my-app-tests)'
         type: string
-      test-repository-ref:
+      tests-repository-ref:
         description: 'Ref to repository containing Cypress tests (e.g. main)'
         type: string
       link-retries:
@@ -121,11 +121,11 @@ jobs:
         with:
           path: io-app
       - name: Clone test repository
-        if: ${{ inputs.test-repository }}
+        if: ${{ inputs.tests-repository }}
         uses: actions/checkout@v3
         with:
-          repository: ${{ inputs.test-repository }}
-          ref: ${{ inputs.test-repository-ref }}
+          repository: ${{ inputs.tests-repository }}
+          ref: ${{ inputs.tests-repository-ref }}
           path: tests
       - name: Get committer email
         working-directory: io-app
@@ -137,7 +137,7 @@ jobs:
         with:
           tag: 'repo:${{ github.repository }}'
           spec: ${{ inputs.spec }}
-          working-directory: ${{ inputs.test-repository == '' && 'io-app' || 'tests' }}
+          working-directory: ${{ inputs.tests-repository == '' && 'io-app' || 'tests' }}
           parallel: ${{ inputs.parallel }}
           record: ${{ !!secrets.record-key }}
         env:
