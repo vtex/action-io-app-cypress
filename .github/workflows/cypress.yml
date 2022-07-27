@@ -91,7 +91,6 @@ jobs:
           shell: bash
 
   setup-containers:
-    needs: link-app
     runs-on: ubuntu-latest
 
     outputs:
