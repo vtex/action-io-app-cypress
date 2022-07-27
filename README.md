@@ -33,7 +33,7 @@ jobs:
   Cypress:
     uses: vtex/action-io-app-cypress/.github/workflows/cypress.yml@main
     with:
-      account: MY_ACCOUNT
+      accounts: '["MY_ACCOUNT"]'
       # Optional repository containing cypress tests
       test-repository: vtex/my-app-tests
       # Optional ref for test repository
