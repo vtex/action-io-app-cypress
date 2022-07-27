@@ -108,7 +108,7 @@ jobs:
         shell: bash
 
   run-cypress:
-    needs: setup-containers
+    needs: [setup-containers, link-app]
     runs-on: ubuntu-latest
 
     strategy:
