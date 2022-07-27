@@ -23,7 +23,7 @@ on:
         type: boolean
       containers:
         description: 'Amount of parallel containers to summon for running tests'
-        default: 5
+        default: 1
         type: number
     secrets:
       app-key:
