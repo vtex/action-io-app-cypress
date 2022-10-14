@@ -67,7 +67,7 @@ jobs:
         run: |
           sha=${{ github.sha }}
           sha8=${sha:0:8}
-          echo ::set-output name=workspace::e2e$sha8
+          echo workspace=e2e$sha8 >> $GITHUB_OUTPUT
         shell: bash
       - uses: ./io-action/.github/actions/workspace-manager
         with:
