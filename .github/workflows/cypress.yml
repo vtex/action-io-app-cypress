@@ -133,7 +133,7 @@ jobs:
           echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
         shell: bash
       - name: Cypress
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           tag: 'repo:${{ github.repository }}'
           spec: ${{ inputs.spec }}
