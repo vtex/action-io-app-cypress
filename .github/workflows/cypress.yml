@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Clone app repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: io-app
       - uses: vtex/action-toolbelt-login@v1
@@ -58,7 +58,7 @@ jobs:
           app-key: ${{ secrets.app-key }}
           app-token: ${{ secrets.app-token }}
       - name: Clone action repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: vtex/action-io-app-cypress
           path: io-action
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Clone action repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: vtex/action-io-app-cypress
       - name: Get number of containers
@@ -117,12 +117,12 @@ jobs:
 
     steps:
       - name: Clone app repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: io-app
       - name: Clone test repository
         if: ${{ inputs.tests-repository }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ inputs.tests-repository }}
           ref: ${{ inputs.tests-repository-ref }}
@@ -170,7 +170,7 @@ jobs:
           app-key: ${{ secrets.app-key }}
           app-token: ${{ secrets.app-token }}
       - name: Clone action repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: vtex/action-io-app-cypress
           path: io-action
